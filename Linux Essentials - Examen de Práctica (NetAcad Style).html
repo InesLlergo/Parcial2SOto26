@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Essentials - Examen de Práctica (NetAcad Style)</title>
+    <style>
+        :root {
+            --cisco-dark-blue: #005073;
+            --cisco-light-blue: #049FD9;
+            --cisco-bg: #F5F7FA;
+            --cisco-text: #333333;
+            --cisco-green: #6CC04A;
+            --cisco-red: #E2231A;
+            --cisco-yellow: #F3C300;
+            --cisco-card-bg: #FFFFFF;
+            --font-main: 'Segoe UI', Inter, Arial, sans-serif;
+            --font-mono: 'Fira Code', Consolas, monospace;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --cisco-bg: #121212;
+                --cisco-card-bg: #1E1E1E;
+                --cisco-text: #E0E0E0;
+                --cisco-dark-blue: #051026;
+            }
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-main);
+            background-color: var(--cisco-bg);
+            color: var(--cisco-text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--cisco-dark-blue);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .cisco-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 24px;
+        }
+        .cisco-bars div { background-color: white; width: 4px; }
+        .cisco-bars div:nth-child(1) { height: 12px; }
+        .cisco-bars div:nth-child(2) { height: 18px; }
+        .cisco-bars div:nth-child(3) { height: 24px; }
+        .cisco-bars div:nth-child(4) { height: 18px; }
+        .cisco-bars div:nth-child(5) { height: 12px; }
+
+        .salvavidas-btn {
+            background-color: var(--cisco-light-blue);
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .salvavidas-btn:hover { background-color: #037bb0; }
+
+        /* Score Panel */
+        .score-panel {
+            background-color: var(--cisco-card-bg);
+            padding: 10px 20px;
+            border-bottom: 2px solid var(--cisco-light-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 60px;
+            z-index: 999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            margin: 0 20px;
+            background-color: #ddd;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--cisco-light-blue);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Main Content */
+        .container {
+            display: flex;
+            flex: 1;
+            max-width: 1200px;
+            margin: 20px auto;
+            width: 100%;
+            gap: 20px;
+            padding: 0 10px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--cisco-card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            height: fit-content;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        /* Settings Screen */
+        #settings-screen {
+            background-color: var(--cisco-card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            background-color: var(--cisco-bg);
+            color: var(--cisco-text);
+        }
+        
+        .btn-primary {
+            background-color: var(--cisco-light-blue);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn-primary:hover { background-color: #037bb0; }
+
+        /* Question Cards */
+        .question-card {
+            background-color: var(--cisco-card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .question-card.active { display: block; }
+
+        .question-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .question-number {
+            background-color: var(--cisco-dark-blue);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            height: fit-content;
+        }
+        .question-meta {
+            font-size: 0.85rem;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question-body {
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+
+        input[type="text"] {
+            font-family: var(--font-mono);
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            color: #000;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .options-list { list-style: none; padding: 0; }
+        .options-list li { margin-bottom: 10px; }
+        .options-list label { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 10px; border: 1px solid transparent; border-radius: 6px; }
+        .options-list label:hover { background: rgba(4,159,217,.08); }
+        .options-list label:has(input:checked) { background: rgba(4,159,217,.18); border-color: var(--cisco-light-blue); font-weight: 600; }
+        .options-list input { accent-color: var(--cisco-light-blue); width: 18px; height: 18px; }
+        .grid-item.answered { background-color: var(--cisco-light-blue); color: #fff; border-color: var(--cisco-light-blue); }
+        
+        /* Order Question */
+        .order-list { list-style: none; padding: 0; }
+        .order-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--cisco-bg); padding: 10px; margin-bottom: 5px; border-radius: 4px; border: 1px solid #ddd;
+        }
+        .order-btns button { padding: 5px 10px; font-size: 12px; margin-left: 5px; cursor: pointer; }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn-nav {
+            padding: 10px 20px;
+            border: none;
+            background-color: #ddd;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-nav:hover { background-color: #ccc; }
+        .btn-nav:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Grid Map */
+        .grid-map { display: flex; flex-wrap: wrap; gap: 5px; }
+        .grid-item {
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; background-color: #eee; color: #333; font-size: 0.8rem;
+            cursor: pointer; border: 1px solid #ccc;
+        }
+        .grid-item.correct { background-color: var(--cisco-green); color: white; border-color: var(--cisco-green); }
+        .grid-item.incorrect { background-color: var(--cisco-red); color: white; border-color: var(--cisco-red); }
+        .grid-item.partial { background-color: var(--cisco-yellow); color: #333; border-color: var(--cisco-yellow); }
+        .grid-item.active { box-shadow: 0 0 0 2px var(--cisco-light-blue); }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 15px; padding: 10px; border-radius: 4px; display: none; font-weight: bold; font-size: 0.9rem;
+        }
+        .feedback.correct { background-color: #e6f6e1; color: var(--cisco-green); border: 1px solid var(--cisco-green); display: block; }
+        .feedback.incorrect { background-color: #fceceb; color: var(--cisco-red); border: 1px solid var(--cisco-red); display: block; }
+        .feedback.partial { background-color: #fff9e6; color: #b38f00; border: 1px solid var(--cisco-yellow); display: block; }
+        
+        @media (prefers-color-scheme: dark) {
+            .feedback.correct { background-color: rgba(108, 192, 74, 0.1); }
+            .feedback.incorrect { background-color: rgba(226, 35, 26, 0.1); }
+            .feedback.partial { background-color: rgba(243, 195, 0, 0.1); }
+        }
+
+        .correct-answer-text { color: var(--cisco-green); font-family: var(--font-mono); font-size: 0.9em; display: block; margin-top: 5px;}
+        .omitted-text { color: var(--cisco-red); font-size: 0.85em; font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="cisco-bars">
+                <div></div><div></div><div></div><div></div><div></div>
+            </div>
+            Linux Essentials - NetAcad
+        </div>
+        <a href="https://inesllergo.github.io/Salvavidas10-18AllQuestions/" target="_blank" rel="noopener noreferrer" class="salvavidas-btn">
+            Salvavidas 10-18 · Examen práctica de los módulos
+        </a>
+    </header>
+
+    <div class="score-panel" id="score-panel" style="display: none;">
+        <div style="font-weight: bold;">Score: <span id="score-points">0</span> / <span id="score-total">0</span> (<span id="score-percent">0</span>%)</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div id="status-badge" style="font-weight: bold; padding: 4px 8px; border-radius: 4px;"></div>
+    </div>
+
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar" id="sidebar" style="display: none;">
+            <h3>Navegación</h3>
+            <div class="grid-map" id="grid-map"></div>
+            <button id="btn-submit-exam" class="btn-primary" style="margin-top: 20px;">Terminar y Calificar</button>
+            <button id="btn-restart" class="btn-nav" style="margin-top: 10px; width: 100%;">Reiniciar</button>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="main-content">
+            
+            <!-- Settings Screen -->
+            <div id="settings-screen">
+                <h2>Configuración del Examen</h2>
+                <div class="form-group">
+                    <label>Capítulo / Tema</label>
+                    <select id="sel-chapter">
+                        <option value="all">Todos los capítulos (10-18)</option>
+                        <option value="10">Capítulo 10 - Working With Text</option>
+                        <option value="11">Capítulo 11 - Shell Scripts in a Nutshell</option>
+                        <option value="12">Capítulo 12 - Understanding Computer Hardware</option>
+                        <option value="13">Capítulo 13 - Where Data is Stored</option>
+                        <option value="14">Capítulo 14 - Network</option>
+                        <option value="15">Capítulo 15 - System and User Security</option>
+                        <option value="16">Capítulo 16 - Creating Users and Groups</option>
+                        <option value="17">Capítulo 17 - Ownership and Permissions</option>
+                        <option value="18">Capítulo 18 - Special Directories and Files</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad de Preguntas</label>
+                    <select id="sel-count">
+                        <option value="10">10 Preguntas</option>
+                        <option value="15">15 Preguntas</option>
+                        <option value="30">30 Preguntas</option>
+                        <option value="50">50 Preguntas</option>
+                        <option value="all">Todas las disponibles</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Modo</label>
+                    <select id="sel-mode">
+                        <option value="exam">Examen (Califica al final)</option>
+                        <option value="practice">Práctica (Comprobar por pregunta)</option>
+                    </select>
+                </div>
+                <button id="btn-start" class="btn-primary">Iniciar Examen</button>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quiz-screen" style="display: none;">
+                <div id="questions-container"></div>
+                <div class="nav-buttons">
+                    <button id="btn-prev" class="btn-nav">Anterior</button>
+                    <button id="btn-check" class="btn-primary" style="display: none; width: auto; padding: 10px 20px; margin-top: 0;">Comprobar</button>
+                    <button id="btn-next" class="btn-nav">Siguiente</button>
+                </div>
+            </div>
+            
+            <!-- Results Screen -->
+            <div id="results-screen" style="display: none; background-color: var(--cisco-card-bg); padding: 30px; border-radius: 8px;">
+                <h2>Resultados Finales</h2>
+                <h1 id="final-score" style="color: var(--cisco-light-blue);">0/10</h1>
+                <h3 id="final-status"></h3>
+                <div id="failed-list" style="margin-top: 20px;"></div>
+                <button id="btn-retry" class="btn-primary">Nuevo Examen</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // BANCO DE PREGUNTAS (Capítulos 10 al 18)
+        const questionBank = [
+            // ================= CAPITULO 10 =================
+            {
+                id: "c10_1", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando <input type='text' data-idx='0'> (short de concatenate) se utiliza para crear o mostrar el contenido de un archivo.",
+                answers: [["cat"]]
+            },
+            {
+                id: "c10_2", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "Para mostrar las primeras 5 líneas de un archivo, puedes usar: <input type='text' data-idx='0'> /etc/archivo",
+                answers: [["head -n 5", "head -5", "head -n +5"]]
+            },
+            {
+                id: "c10_3", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "Para mostrar las últimas 10 líneas ACTUALES de un archivo y mantenerlo abierto actualizándose, se utiliza el comando <input type='text' data-idx='0'>",
+                answers: [["tail -f"]]
+            },
+            {
+                id: "c10_4", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando <input type='text' data-idx='0'> muestra y numera todas las líneas del archivo.",
+                answers: [["nl"]]
+            },
+            {
+                id: "c10_5", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "Para redirigir el stderror (mensajes de error) a un archivo llamado error.txt, se usa la sintaxis: ls /fake <input type='text' data-idx='0'> error.txt",
+                answers: [["2>"]]
+            },
+            {
+                id: "c10_6", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "Para redirigir TANTO el stdout como el stderr a un archivo llamado all.txt, se usa: ls /fake /etc/ppp <input type='text' data-idx='0'> all.txt",
+                answers: [["&>"]]
+            },
+            {
+                id: "c10_7", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando para traducir caracteres (ej. de minúsculas a mayúsculas) es <input type='text' data-idx='0'>",
+                answers: [["tr"]]
+            },
+            {
+                id: "c10_8", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "Para ordenar numéricamente un archivo basándose en la tercera columna, usando ':' como delimitador, el comando es: sort <input type='text' data-idx='0'> mypasswd",
+                answers: [["-t: -n -k3", "-n -t: -k3", "-k3 -n -t:"]]
+            },
+            {
+                id: "c10_9", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "Para contar únicamente el número de líneas de un archivo, se usa la opción <input type='text' data-idx='0'> con el comando wc.",
+                answers: [["-l", "wc -l"]]
+            },
+            {
+                id: "c10_10", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "Para extraer las columnas 5 a 7 de un archivo usando ':' como delimitador, se utiliza: cut <input type='text' data-idx='0'> mypasswd",
+                answers: [["-d: -f5-7", "-f5-7 -d:"]]
+            },
+            {
+                id: "c10_11", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando <input type='text' data-idx='0'> filtra líneas en un archivo que coincidan con un patrón o caracteres especiales.",
+                answers: [["grep"]]
+            },
+            {
+                id: "c10_12", chapter: 10, type: "multiple-response", points: 0.667,
+                text: "¿Qué opciones de grep son correctas según su descripción?",
+                options: [
+                    {text: "-v invierte y NO muestra lo que contiene el patrón", correct: true},
+                    {text: "-i ignora distinciones entre mayúsculas y minúsculas", correct: true},
+                    {text: "-c muestra las n líneas que coinciden (el texto de la línea)", correct: false},
+                    {text: "-w regresa las palabras completas encontradas tal cual", correct: true}
+                ]
+            },
+            {
+                id: "c10_13", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "En expresiones regulares, el símbolo <input type='text' data-idx='0'> se utiliza para indicar que el patrón debe empezar desde el inicio de la línea.",
+                answers: [["^"]]
+            },
+            {
+                id: "c10_14", chapter: 10, type: "fill-in-the-blank", points: 0.667,
+                text: "Para agrupar Expresiones Regulares Extendidas (egrep) con grep, se usa la opción <input type='text' data-idx='0'>.",
+                answers: [["-E"]]
+            },
+
+            // ================= CAPITULO 11 =================
+            {
+                id: "c11_1", chapter: 11, type: "fill-in-the-blank", points: 0.667,
+                text: "La primera línea de un script en bash shell que indica el path del ejecutable es: <input type='text' data-idx='0'>",
+                answers: [["#!/bin/bash"]]
+            },
+            {
+                id: "c11_2", chapter: 11, type: "fill-in-the-blank", points: 0.667,
+                text: "Para otorgar permisos de ejecución a todos los usuarios en el archivo sample.sh, el comando es: <input type='text' data-idx='0'> sample.sh",
+                answers: [["chmod a+x", "chmod +x"]]
+            },
+            {
+                id: "c11_3", chapter: 11, type: "fill-in-the-blank", points: 0.667,
+                text: "Para ejecutar el script sample.sh ubicado en el directorio actual, escribimos: <input type='text' data-idx='0'>sample.sh",
+                answers: [["./"]]
+            },
+            {
+                id: "c11_4", chapter: 11, type: "multiple-choice", points: 0.667,
+                text: "En bash, ¿qué tipo de comillas interpreta el contenido y guarda la ejecución de comandos en una variable?",
+                options: [
+                    {text: "Comillas dobles", correct: false},
+                    {text: "Comillas simples", correct: false},
+                    {text: "Comillas invertidas o backticks", correct: true},
+                    {text: "Paréntesis ( )", correct: false}
+                ]
+            },
+            {
+                id: "c11_5", chapter: 11, type: "fill-in-the-blank", points: 0.667,
+                text: "En un script interactivo, el comando <input type='text' data-idx='0'> se usa para leer la entrada del usuario y guardarla en una variable.",
+                answers: [["read"]]
+            },
+            {
+                id: "c11_6", chapter: 11, type: "fill-in-the-blank", points: 0.667,
+                text: "En bash, la sentencia if finaliza siempre con la palabra clave <input type='text' data-idx='0'>.",
+                answers: [["fi"]]
+            },
+
+            // ================= CAPITULO 12 =================
+            {
+                id: "c12_1", chapter: 12, type: "fill-in-the-blank", points: 0.667,
+                text: "Para ver la arquitectura del procesador de la computadora actual (ej. x86_64), se usa el comando <input type='text' data-idx='0'> o también <input type='text' data-idx='1'>.",
+                answers: [["arch"], ["lscpu"]]
+            },
+            {
+                id: "c12_2", chapter: 12, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando <input type='text' data-idx='0'> muestra la cantidad de RAM y Swap libre y usada en el sistema. Para forzar la salida en megabytes usamos la bandera <input type='text' data-idx='1'>.",
+                answers: [["free"], ["-m"]]
+            },
+            {
+                id: "c12_3", chapter: 12, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando para ver todos los dispositivos conectados al bus PCI (peripheral component interconnect) es <input type='text' data-idx='0'>.",
+                answers: [["lspci"]]
+            },
+            {
+                id: "c12_4", chapter: 12, type: "multiple-response", points: 0.667,
+                text: "¿Cuáles de los siguientes comandos administran particiones de disco tipo MBR?",
+                options: [
+                    {text: "fdisk", correct: true},
+                    {text: "gdisk", correct: false},
+                    {text: "cfdisk", correct: true},
+                    {text: "sgdisk", correct: false}
+                ]
+            },
+            {
+                id: "c12_5", chapter: 12, type: "multiple-response", points: 0.667,
+                text: "¿Cuáles de los siguientes comandos administran particiones de disco tipo GPT?",
+                options: [
+                    {text: "gdisk", correct: true},
+                    {text: "sfdisk", correct: false},
+                    {text: "cgdisk", correct: true},
+                    {text: "sgdisk", correct: true}
+                ]
+            },
+            {
+                id: "c12_6", chapter: 12, type: "fill-in-the-blank", points: 0.667,
+                text: "Para desmontar un dispositivo o sistema de archivos montado (Upon Mounting), se utiliza el comando <input type='text' data-idx='0'>.",
+                answers: [["umount"]]
+            },
+            {
+                id: "c12_7", chapter: 12, type: "true-false", points: 0.667,
+                text: "Los discos duros tipo IDE usualmente tienen el prefijo de archivo (hd), mientras que los SATA/SCSI/USB utilizan el prefijo (sd).",
+                options: [
+                    {text: "Verdadero", correct: true},
+                    {text: "Falso", correct: false}
+                ]
+            },
+
+            // ================= CAPITULO 13 =================
+            {
+                id: "c13_1", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "El Process ID (PID) del proceso init es <input type='text' data-idx='0'>.",
+                answers: [["1"]]
+            },
+            {
+                id: "c13_2", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando para ver la jerarquía de los procesos es <input type='text' data-idx='0'>.",
+                answers: [["pstree"]]
+            },
+            {
+                id: "c13_3", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "Para enviar una señal a un proceso (generalmente para terminarlo) mediante su PID 3498100, usamos: <input type='text' data-idx='0'> 3498100",
+                answers: [["kill"]]
+            },
+            {
+                id: "c13_4", chapter: 13, type: "multiple-choice", points: 0.667,
+                text: "¿Qué archivo contiene la información pasada al kernel al empezar (parámetros e instrucciones)?",
+                options: [
+                    {text: "/proc/meminfo", correct: false},
+                    {text: "/proc/cmdline", correct: true},
+                    {text: "/proc/modules", correct: false},
+                    {text: "/etc/sysctl.conf", correct: false}
+                ]
+            },
+            {
+                id: "c13_5", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "Para ver los procesos de un usuario específico (por ejemplo, root) usando ps, el comando es: ps <input type='text' data-idx='0'> root",
+                answers: [["-u"]]
+            },
+            {
+                id: "c13_6", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "Dentro de top, presionamos la tecla <input type='text' data-idx='0'> para terminar (kill) un proceso y la tecla <input type='text' data-idx='1'> para ajustar la prioridad (renice).",
+                answers: [["k", "K"], ["r", "R"]]
+            },
+            {
+                id: "c13_7", chapter: 13, type: "multiple-response", points: 0.667,
+                text: "¿Cuáles de los siguientes comandos te permiten visualizar el 'load average' (qué tan ocupado ha estado el sistema)?",
+                options: [
+                    {text: "top", correct: true},
+                    {text: "uptime", correct: true},
+                    {text: "free", correct: false},
+                    {text: "pstree", correct: false}
+                ]
+            },
+            {
+                id: "c13_8", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "Para actualizar el output de la memoria cada 10 segundos usamos: free <input type='text' data-idx='0'>",
+                answers: [["-s 10", "-s10"]]
+            },
+            {
+                id: "c13_9", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "Para ver los mensajes generados por el kernel durante el startup del sistema, se usa el comando <input type='text' data-idx='0'>.",
+                answers: [["dmesg"]]
+            },
+            {
+                id: "c13_10", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando para ver logs basados en el daemon journald es <input type='text' data-idx='0'>.",
+                answers: [["journalctl"]]
+            },
+            {
+                id: "c13_11", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "El directorio que contiene los sistemas binarios esenciales que son usados principalmente por el root user es <input type='text' data-idx='0'>.",
+                answers: [["/sbin"]]
+            },
+            {
+                id: "c13_12", chapter: 13, type: "fill-in-the-blank", points: 0.667,
+                text: "El directorio para montar manualmente filesystems es <input type='text' data-idx='0'>.",
+                answers: [["/mnt"]]
+            },
+
+            // ================= CAPITULO 14 =================
+            {
+                id: "c14_1", chapter: 14, type: "multiple-choice", points: 0.667,
+                text: "Un 'Service' (servicio) es...",
+                options: [
+                    {text: "...otra forma de llamar al hostname.", correct: false},
+                    {text: "...una característica o funcionalidad provista por un host a otro.", correct: true},
+                    {text: "...un archivo de configuración.", correct: false},
+                    {text: "...como una dirección IP.", correct: false}
+                ]
+            },
+            {
+                id: "c14_2", chapter: 14, type: "fill-in-the-blank", points: 0.667,
+                text: "El protocolo que asocia una IP con una URL/Domain Name es el <input type='text' data-idx='0'>.",
+                answers: [["DNS"]]
+            },
+            {
+                id: "c14_3", chapter: 14, type: "fill-in-the-blank", points: 0.667,
+                text: "Para reiniciar por completo la red en sistemas como CentOS usando el gestor de servicios, tecleamos: <input type='text' data-idx='0'> network restart",
+                answers: [["service"]]
+            },
+            {
+                id: "c14_4", chapter: 14, type: "multiple-choice", points: 0.667,
+                text: "¿Qué archivo contiene las direcciones IP de los name servers que el sistema debe consultar para resolver nombres a IPs?",
+                options: [
+                    {text: "/etc/nsswitch.conf", correct: false},
+                    {text: "/etc/resolv.conf", correct: true},
+                    {text: "/etc/hosts", correct: false},
+                    {text: "/etc/resolve.conf", correct: false}
+                ]
+            },
+            {
+                id: "c14_5", chapter: 14, type: "fill-in-the-blank", points: 0.667,
+                text: "Para ver la tabla de enrutamiento (gateway) numéricamente usando route, el comando es route <input type='text' data-idx='0'>.",
+                answers: [["-n"]]
+            },
+            {
+                id: "c14_6", chapter: 14, type: "multiple-response", points: 0.667,
+                text: "¿Cuáles de los siguientes comandos se utilizan comúnmente para mostrar la configuración de las interfaces de red (IPv4, IPv6, estado)?",
+                options: [
+                    {text: "ifconfig", correct: true},
+                    {text: "dig", correct: false},
+                    {text: "ip addr show", correct: true},
+                    {text: "netstat -r", correct: false}
+                ]
+            },
+            {
+                id: "c14_7", chapter: 14, type: "fill-in-the-blank", points: 0.667,
+                text: "Para mostrar todas las conexiones TCP, que estén escuchando, y ver su número de puerto con netstat se usa netstat <input type='text' data-idx='0'>.",
+                answers: [["-tln"]]
+            },
+            {
+                id: "c14_8", chapter: 14, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando para realizar 'socket analysis' (más moderno que netstat) y ver información detallada de sockets es <input type='text' data-idx='0'>.",
+                answers: [["ss"]]
+            },
+            {
+                id: "c14_9", chapter: 14, type: "fill-in-the-blank", points: 0.667,
+                text: "Para logearte en una máquina remota llamada 'test' con el usuario 'bob', utilizas: <input type='text' data-idx='0'> bob@test",
+                answers: [["ssh"]]
+            },
+            {
+                id: "c14_10", chapter: 14, type: "true-false", points: 0.667,
+                text: "El DHCP (Dynamic Host Configuration Protocol) es el servicio encargado de traducir los nombres de dominio (URLs) en direcciones IP.",
+                options: [
+                    {text: "Verdadero", correct: false},
+                    {text: "Falso", correct: true}
+                ]
+            },
+
+            // ================= CAPITULO 15 =================
+            {
+                id: "c15_1", chapter: 15, type: "multiple-response", points: 0.667,
+                text: "¿Qué archivos contienen información crítica sobre las cuentas de usuario y contraseñas?",
+                options: [
+                    {text: "/etc/passwd", correct: true},
+                    {text: "/etc/shadow", correct: true},
+                    {text: "/etc/group", correct: false},
+                    {text: "/etc/resolv.conf", correct: false}
+                ]
+            },
+            {
+                id: "c15_2", chapter: 15, type: "true-false", points: 0.667,
+                text: "El archivo /etc/shadow contiene las contraseñas guardadas en texto plano para que el root pueda verlas.",
+                options: [
+                    {text: "Verdadero", correct: false},
+                    {text: "Falso", correct: true}
+                ]
+            },
+            {
+                id: "c15_3", chapter: 15, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando que permite a un usuario normal ejecutar comandos con privilegios de root (requiriendo usualmente la contraseña del propio usuario) es <input type='text' data-idx='0'>.",
+                answers: [["sudo"]]
+            },
+            {
+                id: "c15_4", chapter: 15, type: "fill-in-the-blank", points: 0.667,
+                text: "Para ver qué usuarios pertenecen a un grupo y los GIDs de los grupos, consultamos el archivo <input type='text' data-idx='0'>.",
+                answers: [["/etc/group"]]
+            },
+            {
+                id: "c15_5", chapter: 15, type: "fill-in-the-blank", points: 0.667,
+                text: "En lugar de usar grep, para buscar de manera directa información sobre contraseñas o registros usamos <input type='text' data-idx='0'> passwd record.",
+                answers: [["getent"]]
+            },
+            {
+                id: "c15_6", chapter: 15, type: "fill-in-the-blank", points: 0.667,
+                text: "Para cambiar la contraseña de tu cuenta, debes usar el comando <input type='text' data-idx='0'>.",
+                answers: [["passwd"]]
+            },
+            {
+                id: "c15_7", chapter: 15, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando que lee de /var/log/wtmp para ver un historial detallado de los logins anteriores es <input type='text' data-idx='0'>.",
+                answers: [["last"]]
+            },
+            {
+                id: "c15_8", chapter: 15, type: "fill-in-the-blank", points: 0.667,
+                text: "El comando <input type='text' data-idx='0'> muestra la información del usuario actual: UID, grupo primario y grupos suplementarios a los que pertenece.",
+                answers: [["id"]]
+            },
+            {
+                id: "c15_9", chapter: 15, type: "fill-in-the-blank", points: 0.667,
+                text: "Para iniciar sesión con la cuenta de root dentro de tu terminal y adquirir todos los privilegios (cambiar al root), se usa <input type='text' data-idx='0'>.",
+                answers: [["su", "su -l", "su --login", "su -"]]
+            }
+        ];
+
+        // PREGUNTAS ADICIONALES (formato compacto: cap§tipo§texto§respuestas)
+        const EXTRA=`10§f§Para ver un archivo con paginación avanzada (/ para buscar, B para retroceder) se usa el comando ___.§less
+10§f§Dentro de less o more, la tecla ___ sale del archivo.§q;Q
+10§f§Para mostrar todo el archivo menos las últimas 5 líneas: head ___ /etc/archivo§-n -5
+10§f§Para mostrar desde la línea 25 hasta el final: tail ___ /etc/archivo§-n +25
+10§f§Para numerar las líneas y mostrar desde la 5: nl /etc/archivo ___ tail -n +5 (el símbolo que une la salida de un comando con la entrada de otro)§|
+10§f§echo "hi" ___ hola.txt reemplaza el contenido del archivo.§>
+10§f§echo "Hi2" ___ hola.txt agrega texto sin reemplazar el contenido.§>>
+10§f§Para enviar solo los mensajes de error (stderr) a un archivo: ls /fake ___ error.txt§2>
+10§f§Para enviar stdout y stderr al mismo archivo: ls /fake /etc/ppp ___ all.txt§&>
+10§f§El comando ___ 'a-z' 'A-Z' traduce minúsculas a mayúsculas.§tr
+10§f§Para ordenar al revés se usa sort ___ y para ordenar numéricamente sort ___§-r¶-n
+10§f§sort -t: -n ___ mypasswd ordena numéricamente por la tercera columna.§-k3
+10§f§wc ___ cuenta solo líneas, wc ___ solo palabras y wc ___ solo bytes.§-l¶-w¶-c
+10§f§Para contar los archivos de /etc: ls /etc | ___ -l§wc
+10§f§cut ___ : -f1 mypasswd usa ':' como delimitador.§-d
+10§f§Para mostrar el número de cada línea que coincide: grep ___ bash /etc/mypasswd§-n
+10§f§grep ___ nologin /etc/passwd NO muestra las líneas que contienen nologin.§-v
+10§f§grep ___ the newhome.txt ignora mayúsculas y minúsculas.§-i
+10§f§grep ___ bash /etc/mypasswd cuenta las líneas que coinciden.§-c
+10§f§En regex, ___ coincide con cualquier carácter y ___ con cero o más repeticiones del anterior.§.¶*
+10§f§grep -E 'colou___r' coincide con color y con colour.§?
+11§f§Para guardar y salir de vi desde el modo comando: ___§:wq;:x;ZZ
+11§f§Para cerrar vi sin guardar cambios: ___§:q!
+11§f§Para ir a la tercera línea en vi: ___§3G
+11§f§Para saltar a la última línea del archivo: ___§G;Shift+G
+11§f§Para borrar una palabra completa en vi: ___§dw
+11§f§Para borrar la línea actual: ___§dd
+11§f§Para copiar una palabra: ___ y para pegarla: ___§yw¶p
+11§f§Para deshacer la última acción en vi: ___§u
+11§f§Para buscar hacia adelante la palabra word en vi: ___§/word
+11§f§Para reemplazar cat por dog en todo el archivo: ___§:%s/cat/dog/g
+11§f§Para insertar una línea en blanco debajo del cursor: ___ ; arriba del cursor: ___§o¶O
+11§f§w mueve al inicio de la siguiente palabra, ___ al final de la palabra actual y ___ al inicio de la anterior.§e¶b
+11§f§Para ir al final de la línea en vi se usa ___ y al inicio ___§$¶0
+11§f§Para dar permiso de ejecución a todos en sample.sh: chmod ___ sample.sh§a+x
+11§f§Para ejecutar un script de la carpeta actual: ___sample.sh§./
+11§f§Para imprimir el contenido de la variable PATH: echo ___§$PATH
+11§f§echo "Today is" @@BT@@date ___@@BT@@ imprime el día actual de la semana completo.§+%A
+11§f§En un script, if [ $age ___ 16 ] evalúa si age es menor que 16.§-lt
+11§f§Todo bloque if de bash termina con ___ y todo while con ___§fi¶done
+11§f§Para leer una variable desde el teclado en un script: ___ age§read
+11§f§El comando man ___ muestra las condiciones que se pueden usar en if.§test
+11§f§La primera línea de un script bash es #!___§/bin/bash
+11§c§¿Qué comillas evitan que se interprete la variable $NAME?§'simples'*;"dobles";@@BT@@backticks@@BT@@;Ninguna
+12§f§Para ver información del CPU se usa ___ y para ver solo la arquitectura ___§lscpu¶arch
+12§f§x86 es de ___ bits y x86_64 de ___ bits.§32¶64
+12§f§free ___ muestra la memoria en megabytes y free ___ en gigabytes.§-m¶-g
+12§f§El comando ___ muestra los dispositivos conectados a puertos USB.§lsusb
+12§f§lspci ___ muestra el driver del kernel usado por cada dispositivo.§-k
+12§f§Para listar la tabla de particiones de /dev/sda: fdisk ___ /dev/sda§-l
+12§f§El editor gráfico avanzado de particiones es ___.§gparted
+12§f§cfdisk es la interfaz visual para MBR y ___ la interfaz visual para GPT.§cgdisk
+12§f§sfdisk es el particionador scriptable para MBR y ___ para GPT.§sgdisk
+12§f§La primera partición del primer disco SATA se llama /dev/___§sda1
+12§f§Los discos IDE usan el prefijo ___ y los SATA/SCSI/USB el prefijo ___§hd¶sd
+12§f§El espacio en disco usado como memoria virtual temporal se llama ___ space.§swap
+12§f§El directorio /___ es el punto de montaje manual de sistemas de archivos.§mnt
+12§f§Los medios removibles se montan automáticamente en /___§media
+12§f§Para montar /dev/sdb1 en /mnt: ___ /dev/sdb1 /mnt§mount
+12§t§Los discos de estado sólido (SSD) tienen platos giratorios.§F
+12§t§MBR significa Master Boot Record y es una tecnología de partición de discos.§V
+12§m§¿Cuáles son puertos de video?§VGA*;DVI*;HDMI*;RJ45
+12§c§¿Qué comando muestra la cantidad de RAM libre?§free*;lscpu;lspci;arch
+12§f§GPT significa GUID Partition ___§Table
+13§f§Para terminar un proceso por su PID: ___ 3498100§kill
+13§f§Para ver la jerarquía de procesos: ___§pstree
+13§f§pstree ___ muestra los PIDs de cada proceso.§--show-pids
+13§f§El comando ___ muestra los procesos en tiempo real.§top
+13§f§Dentro de top, la tecla ___ termina un proceso y la tecla ___ ajusta su prioridad.§k;K¶r;R
+13§f§ps ___ y ps ___ muestran todos los procesos del sistema.§aux¶-ef;-ef
+13§f§ps ___ muestra las relaciones padre-hijo como pstree.§--forest
+13§f§ps -u ___ muestra los procesos del usuario root.§root
+13§f§El proceso con PID 1 es ___ (o systemd).§init;systemd
+13§f§El archivo /proc/___ contiene los parámetros pasados al kernel al arrancar.§cmdline
+13§f§El archivo /proc/___ muestra el uso de memoria por el kernel.§meminfo
+13§f§El archivo /proc/___ lista los módulos del kernel cargados.§modules
+13§f§Los cambios permanentes de parámetros del kernel se hacen en /etc/___§sysctl.conf
+13§f§uptime muestra el contenido de /proc/___§loadavg
+13§f§free ___ 10 actualiza la salida cada 10 segundos.§-s
+13§f§Para ver los mensajes del kernel se usa ___§dmesg
+13§f§Para ver solo mensajes USB: dmesg ___ grep -i usb§|
+13§f§Para ver logs basados en journald: ___§journalctl
+14§f§Para mostrar la configuración de red actual: ___ addr show§ip
+14§f§El archivo ___ asocia direcciones IP con hostnames.§/etc/hosts
+14§f§El archivo ___ contiene los servidores DNS.§/etc/resolv.conf
+14§f§El archivo ___ define el orden de los lookups de host.§/etc/nsswitch.conf
+14§f§Para ver la tabla de enrutamiento con ip: ip ___ show§route
+14§f§route ___ muestra solo datos numéricos.§-n
+14§f§ping ___ 4 172.168.10.19 envía 4 paquetes.§-c
+14§f§netstat ___ muestra la tabla de ruteo y netstat ___ estadísticas de tráfico.§-r¶-i
+14§f§netstat -___ muestra conexiones TCP en escucha con números de puerto.§tln
+14§f§ss ___ muestra estadísticas de los tipos de sockets.§-s
+14§f§El servicio SSH usa el puerto ___§22
+14§f§El comando ___ prueba el funcionamiento del servidor DNS.§dig
+14§f§host ___ CNAME ejemplo.com consulta registros CNAME.§-t
+14§f§host ___ ejemplo.com muestra toda la información del host.§-a
+14§f§Para salir de una sesión ssh y volver a la máquina local: ___§exit
+14§f§Las llaves de hosts conocidos están en ~/.ssh/___§known_hosts
+14§f§El dispositivo loopback se llama ___§lo
+14§f§Para reiniciar la red: service network ___§restart
+14§f§Para activar la interfaz eth0: ___ eth0§ifup
+14§f§El archivo de configuración IPv4/IPv6 es /etc/sysconfig/network-scripts/___§ifcfg-eth0
+15§f§Para entrar como root con shell de login: su ___§-;-l;--login
+15§f§id ___ muestra el grupo primario e id ___ todos los grupos.§-g¶-G
+15§f§El archivo con las contraseñas cifradas es ___§/etc/shadow
+15§f§La x en /etc/passwd indica que la contraseña está en /etc/___§shadow
+15§f§Las cuentas de sistema usan el shell ___§/usr/sbin/nologin
+15§f§En /etc/shadow, las cuentas de sistema tienen el símbolo ___ en el campo de contraseña.§*
+15§f§El campo de último cambio cuenta los días desde el 1 de enero de ___§1970
+15§f§El valor ___ en días máximos significa que la contraseña básicamente no expira.§99999
+15§f§Para ver los usuarios conectados: ___§who
+15§f§Para ver tu nombre de usuario: ___§whoami
+15§f§Para ver el historial de intentos fallidos de login: ___§lastb
+15§f§Las contraseñas de grupo se guardan en /etc/___§gshadow
+15§f§Una terminal local empieza con ___ y una pseudo-terminal con ___§tty¶pts
+15§f§Para ver el registro del grupo root: getent ___ root§group
+15§f§Para leer /etc/shadow un usuario normal ejecuta ___ head /etc/shadow§sudo
+15§t§su sin opciones cambia al usuario root.§V
+15§t§Un asterisco en el campo de contraseña de /etc/shadow permite iniciar sesión con contraseña.§F
+15§m§¿Cuáles son campos de /etc/passwd?§Home directory*;Shell*;UID*;Días de aviso (warn)
+15§c§¿Cuántos campos separados por : tiene una línea de /etc/passwd?§7*;5;9;6
+15§f§Para cambiar a otro usuario: ___ - ines§su
+16§f§Para crear un grupo: ___ research§groupadd
+16§f§groupadd ___ 1005 research crea el grupo con GID 1005.§-g
+16§f§groupadd ___ sales crea un grupo de sistema con GID bajo.§-r
+16§f§Para renombrar un grupo: ___ -n clerks sales§groupmod
+16§f§groupmod ___ cambia el GID de un grupo.§-g
+16§f§Para borrar el grupo clerks: ___ clerks§groupdel
+16§f§Para buscar archivos huérfanos por GID: find / ___§-nogroup
+16§f§Para crear un usuario: ___ ines§useradd
+16§f§Para ver los valores por defecto de useradd: useradd ___§-D
+16§f§useradd ___ 1000 ines asigna el UID 1000.§-u
+16§f§useradd ___ users ines asigna el grupo primario users.§-g
+16§f§useradd ___ sales,oxxo ines asigna grupos suplementarios.§-G
+16§f§useradd ___ ines crea el home directory.§-m
+16§f§useradd -m ___ /test ines cambia el directorio base.§-b
+16§f§useradd ___ 'Ines uwu' ines agrega el nombre completo (comentario).§-c
+16§f§useradd ___ /bin/sh ines usa un shell distinto al default.§-s
+16§f§La opción ___ indica el skeleton directory y su valor por defecto es /etc/___§-k¶skel
+16§f§Los valores por defecto de useradd se aplican desde /etc/___§login.defs
+16§f§Para ocultar comentarios y líneas vacías: grep -___ '^#|^$' /etc/login.defs§Ev;vE
+16§f§Un nombre de usuario puede tener máximo ___ caracteres.§32
+16§f§useradd ___ fecha asigna la fecha de expiración y useradd ___ días la inactividad.§-e¶-f
+16§f§Para cambiar la contraseña de ines: ___ ines§passwd
+16§f§chage ___ lista la información de caducidad de contraseña.§-l
+16§f§chage ___ define días mínimos, ___ días máximos y ___ días de aviso.§-m¶-M¶-W
+16§f§Para bloquear la cuenta de ines: ___ -L ines§usermod
+16§f§usermod ___ ines desbloquea la cuenta.§-U
+16§f§Para añadir a ines al grupo development sin quitarle otros: usermod ___ development ines§-aG
+16§f§Para eliminar a ines junto con su home y mail spool: userdel ___ ines§-r
+16§f§usermod ___ NEW_LOGIN cambia el nombre de login.§-l
+16§t§userdel ines (sin opciones) elimina también el home directory.§F
+16§t§UPG (user private group) crea un grupo privado al crear un usuario nuevo.§V
+17§f§El carácter que indica directorio es ___, enlace simbólico ___ y pipe ___§d¶l¶p
+17§f§El carácter que indica block file es ___, character file ___ y socket ___§b¶c¶s
+17§f§Valores numéricos: r=___, w=___, x=___§4¶2¶1
+17§f§rwx = ___, r-x = ___, rw- = ___ (numérico)§7¶5¶6
+17§f§chmod 754 abc.txt deja los permisos ___§rwxr-xr--
+17§f§chmod g___w abc.txt agrega escritura al grupo.§+
+17§f§chmod u___rx abc.txt deja solo lectura y ejecución al dueño.§=
+17§f§chmod ug+x,o___r quita lectura a otros.§-
+17§f§En chmod, o significa ___ y a significa ___§others¶all
+17§f§Con umask 027 los archivos nuevos reciben permisos ___§640
+17§f§Con umask 027 los directorios nuevos reciben permisos ___§750
+17§f§Con umask 022 archivos ___ y directorios ___§644¶755
+17§f§Antes de aplicar umask, los archivos parten de ___ y los directorios de ___§666¶777
+17§f§Para cambiar el grupo de un archivo: ___ oxxo archivo§chgrp
+17§f§chgrp ___ cambia el grupo de forma recursiva.§-R
+17§f§Para cambiar el dueño de un archivo: ___ ines archivo§chown
+17§f§chown ines___users file2 cambia usuario y grupo.§:;.
+17§f§Para cambiar de grupo primario en la sesión actual: ___ oxxo§newgrp
+17§f§Para ver los grupos del usuario: ___§groups
+17§f§Para ver detalles de un archivo (permisos, UID, GID): ___ archivo§stat
+17§f§Para crear un archivo vacío o actualizar su fecha: ___ /tmp/filetest1§touch
+17§f§Solo el usuario ___ puede cambiar el dueño de un archivo con chown.§root
+17§f§La umask del usuario se puede cambiar en el archivo ~/.___§bashrc
+17§f§chmod ___ file deja r-x a otros (sin tocar los demás).§o=rx
+17§t§Para borrar un archivo se necesita permiso w sobre el archivo mismo.§F
+17§t§Para ejecutar ls /data se necesita permiso r sobre el directorio.§V
+17§t§Para entrar con cd a un directorio se necesita permiso x.§V
+17§c§Con -rwxr-xr-- bob bob abc.txt, ¿qué pueden hacer los demás usuarios (others)?§Solo leer*;Leer y ejecutar;Nada;Escribir
+17§c§Con -rwxr-xr-- bob bob abc.txt, ¿qué puede hacer el grupo bob?§Leer y ejecutar*;Leer y escribir;Solo leer;Todo
+17§c§Con drwxr-xr-x root root /data y -rwxr-xr-- bob /data/abc.txt, ¿quién puede borrar abc.txt?§Solo root*;Bob;Todos;El grupo bob
+17§f§En -rw-r--r-- 2 ines ines, el número 2 indica la cantidad de ___§links;enlaces;hard links
+18§f§Para activar setuid simbólicamente: chmod u___ file§+s
+18§f§Para activar setuid numéricamente: chmod ___755 file§4
+18§f§Para quitar setuid: chmod u___ file§-s
+18§f§Para activar setgid numéricamente: chmod ___775 dir§2
+18§f§Para activar el sticky bit simbólicamente: chmod o___ dir§+t
+18§f§Para activar el sticky bit numéricamente: chmod ___775 dir§1
+18§f§En -rwsr-xr-x la s está en la posición de ejecución del ___§user;usuario;owner;dueño
+18§f§Una S mayúscula en drwxrwSr-x indica setgid sin permiso de ___ para el grupo.§execute;ejecución;x
+18§f§El permiso ___ evita que usuarios borren archivos ajenos en un directorio común.§sticky bit;sticky
+18§f§El comando /usr/bin/___ tiene setuid para que un usuario cambie su contraseña.§passwd
+18§f§chmod 4755 archivo se muestra como ___§-rwsr-xr-x
+18§f§chmod 2755 archivo se muestra como ___§-rwxr-sr-x
+18§f§chmod 1777 dir se muestra como ___§drwxrwxrwt
+18§f§Con setgid en un directorio, los archivos nuevos heredan el ___ del directorio.§grupo;group
+18§f§Para crear un hard link: ___ target link_name§ln
+18§f§Para crear un enlace simbólico: ln ___ target link_name§-s
+18§f§Con setuid, el programa se ejecuta con los permisos del ___ del archivo.§dueño;owner;usuario;user
+18§t§Un hard link y su archivo original deben estar en el mismo filesystem.§V
+18§t§Un enlace simbólico puede apuntar a un archivo de otro filesystem.§V
+18§t§Se puede crear un enlace simbólico a un directorio.§V
+18§t§Si se borra el archivo original, el enlace simbólico queda roto.§V
+18§f§ls ___ muestra también los archivos ocultos.§-a
+18§f§ls -___ lista el directorio mismo y no su contenido.§ld
+18§f§Los directorios para archivos temporales son /___ y /var/___§tmp¶tmp
+18§f§El software de terceros se instala en /___§opt
+18§f§Los archivos de log se guardan en /var/___§log
+18§f§Los binarios esenciales para root están en /___§sbin
+18§f§El home del usuario root es /___§root
+18§f§El filesystem virtual de hardware es /___ y el de procesos /___§sys¶proc
+18§f§El software sin origen de distribución va en /usr/___§local
+18§f§Los archivos de dispositivos de hardware están en /___§dev
+18§f§Los archivos necesarios para arrancar el sistema están en /___§boot
+18§c§El path etc/ejemplo.ruta es un path:§Relativo*;Absoluto;Ninguno;Raíz
+18§c§El path /etc/ejemplo.ruta es un path:§Absoluto*;Relativo;Ninguno;Home
+11§f§Para crear un directorio llamado bin: ___ bin§mkdir
+15§f§El comando ___ muestra los usuarios conectados, qué hacen y el tiempo que lleva encendido el sistema.§w`;
+        EXTRA.split('\n').forEach((l,n)=>{l=l.replace(/@@BT@@/g,String.fromCharCode(96));
+            const [c,t,x,a]=l.split('§'),q={id:'x'+c+'_'+n,chapter:+c,points:0.667};
+            const e=z=>z.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            if(t=='f'){q.type='fill-in-the-blank';let i=0;q.text=e(x).replace(/___/g,()=>`<input type='text' data-idx='${i++}'>`);q.answers=a.split('¶').map(z=>z.split(';'));}
+            else if(t=='t'){q.type='true-false';q.text=e(x);q.options=[{text:'Verdadero',correct:a=='V'},{text:'Falso',correct:a=='F'}];}
+            else{q.type=t=='m'?'multiple-response':'multiple-choice';q.text=e(x);q.options=shuffle(a.split(';').map(z=>({text:z.replace(/\*$/,''),correct:z.endsWith('*')})));}
+            questionBank.push(q);
+        });
+
+        // QUIZ STATE
+        let currentQuestions = [];
+        let userAnswers = {}; // id -> value (string | array)
+        let currentIdx = 0;
+        let mode = 'exam';
+        let scored = false;
+
+        // UI ELEMENTS
+        const ui = {
+            screens: {
+                settings: document.getElementById('settings-screen'),
+                quiz: document.getElementById('quiz-screen'),
+                results: document.getElementById('results-screen')
+            },
+            btnStart: document.getElementById('btn-start'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnNext: document.getElementById('btn-next'),
+            btnCheck: document.getElementById('btn-check'),
+            btnSubmit: document.getElementById('btn-submit-exam'),
+            btnRestart: document.getElementById('btn-restart'),
+            btnRetry: document.getElementById('btn-retry'),
+            qContainer: document.getElementById('questions-container'),
+            gridMap: document.getElementById('grid-map'),
+            sidebar: document.getElementById('sidebar'),
+            scorePanel: document.getElementById('score-panel')
+        };
+
+        // HELPER FUNCTIONS
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function normalizeStr(str) {
+            return (str || '').trim().replace(/\s+/g, ' ');
+        }
+
+        function startQuiz() {
+            const chap = document.getElementById('sel-chapter').value;
+            const count = document.getElementById('sel-count').value;
+            mode = document.getElementById('sel-mode').value;
+
+            // Filter questions
+            let filtered = questionBank;
+            if (chap !== 'all') {
+                filtered = questionBank.filter(q => q.chapter == chap);
+            }
+
+            // Shuffle & slice
+            filtered = shuffle([...filtered]);
+            if (count !== 'all') {
+                filtered = filtered.slice(0, parseInt(count));
+            }
+
+            if (filtered.length === 0) {
+                alert("No hay preguntas disponibles para esta selección.");
+                return;
+            }
+
+            currentQuestions = filtered;
+            userAnswers = {};
+            currentIdx = 0;
+            scored = false;
+
+            // UI Setup
+            ui.screens.settings.style.display = 'none';
+            ui.screens.results.style.display = 'none';
+            ui.screens.quiz.style.display = 'block';
+            ui.sidebar.style.display = 'flex';
+            ui.scorePanel.style.display = 'flex';
+            
+            ui.btnCheck.style.display = mode === 'practice' ? 'inline-block' : 'none';
+
+            buildGrid();
+            renderQuestion();
+            updateScoreUI();
+        }
+
+        function buildGrid() {
+            ui.gridMap.innerHTML = '';
+            currentQuestions.forEach((q, i) => {
+                const div = document.createElement('div');
+                div.className = 'grid-item';
+                div.textContent = i + 1;
+                div.onclick = () => {
+                    saveCurrentAnswer();
+                    currentIdx = i;
+                    renderQuestion();
+                };
+                ui.gridMap.appendChild(div);
+            });
+        }
+
+        function renderQuestion() {
+            const q = currentQuestions[currentIdx];
+            const savedAns = userAnswers[q.id];
+            const locked = scored || (mode === 'practice' && q.isChecked);
+            
+            let typeLabel = "Elección múltiple";
+            if(q.type === 'fill-in-the-blank') typeLabel = "Completar el espacio en blanco";
+            if(q.type === 'multiple-response') typeLabel = "Respuestas múltiples";
+            if(q.type === 'true-false') typeLabel = "Verdadero o falso";
+            if(q.type === 'order') typeLabel = "Ordenar";
+
+            let html = `
+                <div class="question-card active" id="card-${q.id}">
+                    <div class="question-header">
+                        <div class="question-number">${currentIdx + 1}</div>
+                        <div class="question-meta">
+                            <span style="color: var(--cisco-light-blue); font-weight: bold;">Capítulo ${q.chapter}</span>
+                            <span>${(0).toFixed(3)} / ${q.points.toFixed(3)} puntos · ${typeLabel}</span>
+                        </div>
+                    </div>
+                    <div class="question-body">
+            `;
+
+            if (q.type === 'fill-in-the-blank') {
+                html += `<p>${q.text}</p>`;
+                html += `<div id="fb-${q.id}" class="feedback"></div>`;
+            } 
+            else if (q.type === 'multiple-choice' || q.type === 'true-false') {
+                html += `<p>${q.text}</p><ul class="options-list">`;
+                q.options.forEach((opt, i) => {
+                    const checked = savedAns === i.toString() ? 'checked' : '';
+                    html += `<li>
+                        <label>
+                            <input type="radio" name="ans-${q.id}" value="${i}" ${checked} ${locked?'disabled':''}>
+                            ${opt.text}
+                        </label>
+                    </li>`;
+                });
+                html += `</ul><div id="fb-${q.id}" class="feedback"></div>`;
+            }
+            else if (q.type === 'multiple-response') {
+                html += `<p>${q.text}</p><ul class="options-list">`;
+                const savedArr = Array.isArray(savedAns) ? savedAns : [];
+                q.options.forEach((opt, i) => {
+                    const checked = savedArr.includes(i.toString()) ? 'checked' : '';
+                    html += `<li>
+                        <label>
+                            <input type="checkbox" name="ans-${q.id}" value="${i}" ${checked} ${locked?'disabled':''}>
+                            ${opt.text}
+                        </label>
+                        <div class="mr-fb" id="mr-fb-${q.id}-${i}" style="margin-left: 25px;"></div>
+                    </li>`;
+                });
+                html += `</ul><div id="fb-${q.id}" class="feedback"></div>`;
+            }
+
+            html += `</div></div>`;
+            ui.qContainer.innerHTML = html;
+
+            // Restore inputs for fill-in-the-blank
+            if (q.type === 'fill-in-the-blank' && savedAns) {
+                const inputs = document.querySelectorAll(`#card-${q.id} input[type="text"]`);
+                inputs.forEach(input => {
+                    const idx = input.getAttribute('data-idx');
+                    if (savedAns[idx]) input.value = savedAns[idx];
+                    if (locked) input.disabled = true;
+                });
+            }
+
+            // Update UI buttons
+            ui.btnPrev.disabled = currentIdx === 0;
+            ui.btnNext.disabled = currentIdx === currentQuestions.length - 1;
+            
+            Array.from(ui.gridMap.children).forEach((el, i) => {
+                el.classList.toggle('active', i === currentIdx);
+            });
+
+            if (scored || (mode === 'practice' && q.isChecked)) {
+                showFeedback(q);
+            }
+        }
+
+        function saveCurrentAnswer() {
+            const q = currentQuestions[currentIdx];
+            if (scored || (mode === 'practice' && q.isChecked)) return;
+            
+            if (q.type === 'fill-in-the-blank') {
+                const inputs = document.querySelectorAll(`#card-${q.id} input[type="text"]`);
+                let ans = {};
+                inputs.forEach(inp => { ans[inp.getAttribute('data-idx')] = inp.value; });
+                userAnswers[q.id] = ans;
+            } 
+            else if (q.type === 'multiple-choice' || q.type === 'true-false') {
+                const sel = document.querySelector(`input[name="ans-${q.id}"]:checked`);
+                userAnswers[q.id] = sel ? sel.value : null;
+            }
+            else if (q.type === 'multiple-response') {
+                const sels = document.querySelectorAll(`input[name="ans-${q.id}"]:checked`);
+                userAnswers[q.id] = Array.from(sels).map(cb => cb.value);
+            }
+
+            updateGridStatus(currentIdx);
+        }
+
+        function updateGridStatus(idx) {
+            if (scored) return; 
+            const q = currentQuestions[idx];
+            const ans = userAnswers[q.id];
+            const gridItem = ui.gridMap.children[idx];
+            
+            let hasAnswer = false;
+            if (ans) {
+                if (typeof ans === 'object' && !Array.isArray(ans)) {
+                    hasAnswer = Object.values(ans).some(v => v.trim() !== '');
+                } else if (Array.isArray(ans)) {
+                    hasAnswer = ans.length > 0;
+                } else {
+                    hasAnswer = ans !== null;
+                }
+            }
+
+            gridItem.classList.toggle('answered', hasAnswer);
+        }
+
+        function checkAnswer(q) {
+            const ans = userAnswers[q.id];
+            let score = 0;
+
+            if (q.type === 'fill-in-the-blank') {
+                let correctCount = 0;
+                let totalBlanks = q.answers.length;
+                if(ans) {
+                    for (let i = 0; i < totalBlanks; i++) {
+                        const userVal = normalizeStr(ans[i]);
+                        if (q.answers[i].some(a => normalizeStr(a) === userVal)) {
+                            correctCount++;
+                        }
+                    }
+                }
+                score = (correctCount / totalBlanks) * q.points;
+            } 
+            else if (q.type === 'multiple-choice' || q.type === 'true-false') {
+                if (ans != null && q.options[parseInt(ans)] && q.options[parseInt(ans)].correct) {
+                    score = q.points;
+                }
+            }
+            else if (q.type === 'multiple-response') {
+                let correctNeeded = q.options.filter(o => o.correct).length;
+                let correctSelected = 0;
+                let wrongSelected = 0;
+                
+                if(ans) {
+                    ans.forEach(val => {
+                        if(q.options[parseInt(val)].correct) correctSelected++;
+                        else wrongSelected++;
+                    });
+                }
+                
+                if (wrongSelected === 0 && correctSelected > 0) {
+                     score = (correctSelected / correctNeeded) * q.points;
+                } else if (correctSelected === correctNeeded && wrongSelected === 0) {
+                    score = q.points;
+                }
+            }
+
+            return score;
+        }
+
+        function showFeedback(q) {
+            const fb = document.getElementById(`fb-${q.id}`);
+            const score = checkAnswer(q);
+            const isFull = Math.abs(score - q.points) < 0.001;
+
+            const meta = document.querySelector(`#card-${q.id} .question-meta`);
+            if(meta) {
+                 meta.innerHTML = `<span style="color: var(--cisco-light-blue); font-weight: bold;">Capítulo ${q.chapter}</span>
+                            <span>${score.toFixed(3)} / ${q.points.toFixed(3)} puntos</span>`;
+            }
+
+            if (q.type === 'fill-in-the-blank') {
+                const inputs = document.querySelectorAll(`#card-${q.id} input[type="text"]`);
+                const ans = userAnswers[q.id];
+                let allCorrect = true;
+                
+                inputs.forEach(inp => {
+                    const idx = inp.getAttribute('data-idx');
+                    const userVal = normalizeStr(ans ? ans[idx] : '');
+                    const isCorrect = q.answers[idx].some(a => normalizeStr(a) === userVal);
+                    
+                    if (isCorrect) {
+                        inp.style.backgroundColor = '#e6f6e1';
+                        inp.style.borderColor = 'var(--cisco-green)';
+                    } else {
+                        allCorrect = false;
+                        inp.style.backgroundColor = '#fceceb';
+                        inp.style.borderColor = 'var(--cisco-red)';
+                        
+                        let correctText = document.createElement('span');
+                        correctText.className = 'correct-answer-text';
+                        correctText.innerText = `Respuesta correcta: ${q.answers[idx].join(' o ')}`;
+                        inp.parentNode.insertBefore(correctText, inp.nextSibling);
+                    }
+                });
+                
+                if (allCorrect) {
+                    fb.className = 'feedback correct'; fb.innerText = '¡Totalmente correcto!';
+                } else if (score > 0) {
+                    fb.className = 'feedback partial'; fb.innerText = 'Parcialmente correcto.';
+                } else {
+                    fb.className = 'feedback incorrect'; fb.innerText = 'Incorrecto.';
+                }
+            }
+            else if (q.type === 'multiple-response') {
+                const ans = Array.isArray(userAnswers[q.id]) ? userAnswers[q.id] : [];
+                q.options.forEach((opt, i) => {
+                    const fbDiv = document.getElementById(`mr-fb-${q.id}-${i}`);
+                    const isSelected = ans.includes(i.toString());
+                    
+                    if (opt.correct && !isSelected) {
+                        fbDiv.innerHTML = `<span class="omitted-text">Opción omitida: incorrecto</span>`;
+                    } else if (!opt.correct && isSelected) {
+                        fbDiv.innerHTML = `<span class="omitted-text" style="color: var(--cisco-red);">Respuesta seleccionada: incorrecta</span>`;
+                    } else if (opt.correct && isSelected) {
+                        fbDiv.innerHTML = `<span style="color: var(--cisco-green); font-weight: bold;">✔</span>`;
+                    }
+                });
+                
+                if(isFull) {
+                    fb.className = 'feedback correct'; fb.innerText = '¡Totalmente correcto!';
+                } else if (score > 0) {
+                    fb.className = 'feedback partial'; fb.innerText = 'Parcialmente correcto. Tienes opciones correctas, pero te faltaron algunas.';
+                } else {
+                    fb.className = 'feedback incorrect'; fb.innerText = 'Incorrecto. Seleccionaste opciones inválidas o te faltaron opciones.';
+                }
+            }
+            else {
+                 if (isFull) {
+                    fb.className = 'feedback correct'; fb.innerText = '¡Respuesta correcta!';
+                } else {
+                    fb.className = 'feedback incorrect'; 
+                    let correctOpt = q.options.find(o => o.correct);
+                    fb.innerText = `Incorrecto. La respuesta correcta era: ${correctOpt.text}`;
+                }
+            }
+        }
+
+        function updateScoreUI() {
+            let allPos = 0;
+            let totalGot = 0;
+            let totalPos = 0;
+            
+            currentQuestions.forEach((q, i) => {
+                const gridItem = ui.gridMap.children[i];
+                if (!scored && !q.isChecked) { allPos += q.points; return; }
+                const score = checkAnswer(q);
+                totalGot += score;
+                totalPos += q.points;
+                allPos += q.points;
+                gridItem.className = 'grid-item'; // reset
+                const isFull = Math.abs(score - q.points) < 0.001;
+                
+                if (isFull) gridItem.classList.add('correct');
+                else if (score > 0) gridItem.classList.add('partial');
+                else gridItem.classList.add('incorrect');
+            });
+
+            const percent = totalPos === 0 ? 0 : ((totalGot / totalPos) * 100);
+            document.getElementById('score-points').innerText = totalGot.toFixed(2);
+            document.getElementById('score-total').innerText = (scored ? totalPos : allPos).toFixed(2);
+            document.getElementById('score-percent').innerText = percent.toFixed(1);
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            
+            const badge = document.getElementById('status-badge');
+            if (totalPos === 0) {
+                badge.innerText = 'Sin calificar'; badge.style.backgroundColor = '#999'; badge.style.color = 'white';
+            } else if (percent >= 70) {
+                badge.innerText = "Aprobado";
+                badge.style.backgroundColor = 'var(--cisco-green)';
+                badge.style.color = 'white';
+            } else {
+                badge.innerText = "No Aprobado";
+                badge.style.backgroundColor = 'var(--cisco-red)';
+                badge.style.color = 'white';
+            }
+            
+            return {got: totalGot, pos: totalPos, percent};
+        }
+
+        // EVENTS
+        ui.btnStart.onclick = startQuiz;
+        ui.qContainer.addEventListener('input', saveCurrentAnswer);
+        ui.qContainer.addEventListener('change', saveCurrentAnswer);
+        
+        ui.btnNext.onclick = () => {
+            saveCurrentAnswer();
+            if (currentIdx < currentQuestions.length - 1) {
+                currentIdx++;
+                renderQuestion();
+            }
+        };
+
+        ui.btnPrev.onclick = () => {
+            saveCurrentAnswer();
+            if (currentIdx > 0) {
+                currentIdx--;
+                renderQuestion();
+            }
+        };
+
+        ui.btnCheck.onclick = () => {
+            saveCurrentAnswer();
+            const q = currentQuestions[currentIdx];
+            q.isChecked = true;
+            renderQuestion();
+            updateScoreUI();
+        };
+
+        ui.btnSubmit.onclick = () => {
+            saveCurrentAnswer();
+            scored = true;
+            const res = updateScoreUI();
+            
+            ui.screens.quiz.style.display = 'none';
+            ui.screens.results.style.display = 'block';
+            
+            document.getElementById('final-score').innerText = `${res.got.toFixed(2)} / ${res.pos.toFixed(2)} puntos`;
+            document.getElementById('final-status').innerText = res.percent >= 70 ? '¡Felicidades, has aprobado!' : 'Necesitas repasar más. ¡Sigue intentando!';
+            
+            // Render Failed List
+            const failedList = document.getElementById('failed-list');
+            failedList.innerHTML = '<h3>Preguntas para repasar:</h3>';
+            
+            let hasErrors = false;
+            currentQuestions.forEach((q, i) => {
+                const score = checkAnswer(q);
+                if (score < q.points) {
+                    hasErrors = true;
+                    failedList.innerHTML += `<div style="margin-bottom: 10px; padding: 10px; border-left: 4px solid var(--cisco-red); background: var(--cisco-bg);">
+                        <strong>Pregunta ${i+1} (Cap ${q.chapter}):</strong> Revisa el concepto. Obtuviste ${score.toFixed(2)} de ${q.points.toFixed(2)}.
+                    </div>`;
+                }
+            });
+            
+            if(!hasErrors) {
+                failedList.innerHTML += `<p style="color: var(--cisco-green);">¡Perfecto! Tuviste todas las respuestas correctas.</p>`;
+            }
+            
+            ui.btnCheck.style.display = 'none';
+            ui.btnSubmit.style.display = 'none';
+        };
+
+        ui.btnRestart.onclick = () => location.reload();
+        ui.btnRetry.onclick = () => location.reload();
+
+    </script>
+</body>
+</html>
